@@ -27,6 +27,15 @@ Parameters:
     Type: String
     Default: 'cachepolicy'
 
+  ApplicationName:
+    Description: 'The name of the application for tagging and billing'
+    Type: String
+    Default: ''
+
+  CloudFrontWhiteListAccessList:
+    Description: 'The list of country codes that will be allowed access through the CloudFront distribution'
+    Type: List<String>
+
 
   #SubDomain:
   #  Description: Site Subdomain
@@ -89,6 +98,17 @@ Resources:
             S3OriginConfig:
               OriginAccessIdentity: ''
             OriginAccessControlId: !Ref CloudFrontOriginAccessControl
+        PriceClass: PriceClass_All
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: whitelist
+            Locations:
+              - AU #TODO Change this to a list using !SPLIT
+      Tags:
+        - Key: 'Environment'
+          Value: !Ref Environment
+        - Key: 'Application'
+          Value: !Ref ApplicationName
 
   Bucket:
     Type: AWS::S3::Bucket
@@ -99,6 +119,11 @@ Resources:
         BlockPublicPolicy: false
         IgnorePublicAcls: false
         RestrictPublicBuckets: false
+      Tags:
+        - Key: 'Environment'
+          Value: !Ref Environment
+        - Key: 'Application'
+          Value: !Ref ApplicationName
 
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
